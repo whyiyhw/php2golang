@@ -59,3 +59,24 @@ func TestString(t *testing.T) {
 	t.Logf("%T *%s*", s, s)
 	t.Log(len(s)) //0
 }
+
+func TestArray(t *testing.T) {
+	a := [...]int{1, 2, 3, 4}
+	b := [...]int{1, 3, 3, 4}
+	//c := [...]int{1,3,3,4,5}
+	t.Log(a == b)
+	// t.Log(a == c) 长度不同编译报错
+}
+
+func TestSwitch(t *testing.T) {
+	for i := 0; i < 5; i++ {
+		switch i {
+		case 0, 2:
+			t.Log("even")
+		case 1, 3:
+			t.Log("odd")
+		default:
+			t.Log("it is not in 0-3")
+		}
+	}
+}
