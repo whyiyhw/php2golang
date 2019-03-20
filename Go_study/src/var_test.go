@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 	"fmt"
+	"encoding/json"
 )
 
 func TestFirstTry(t *testing.T) {
@@ -79,4 +80,114 @@ func TestSwitch(t *testing.T) {
 			t.Log("it is not in 0-3")
 		}
 	}
+}
+
+// 测试 struct json 生成
+func TestStructJson(t *testing.T) {
+	type IT struct {
+		Company  string   `json:"-"`        // 此字段不会输出到屏幕
+		Subjects []string `json:"subjects"` // 二次编码
+		IsOk     bool     `json:",string"`  // 修改为字符串
+		Price    float64  `json:"price"`
+	}
+	s := IT{"it", []string{"Go", "c++"}, true, 66.66}
+	if buf, err := json.MarshalIndent(s, "", " "); err != nil {
+		t.Log(err)
+	} else {
+		t.Log(string(buf))
+	}
+}
+
+// 测试 map json 生成
+func TestMapJson(t *testing.T) {
+	m := make(map[string]interface{})
+	m["company"] = "cast"
+	m["subjects"] = []string{"Go", "c++"}
+	m["isOk"] = true
+	m["price"] = 66.66
+
+	res, err := json.MarshalIndent(m, "", " ")
+	if err != nil {
+		t.Log(err)
+	} else {
+		t.Log(string(res))
+	}
+
+}
+
+// 测试 json 解析到 结构体
+func TestParseStruct(t *testing.T) {
+	type IT struct {
+		Company  string   `json:"company"`  // 此字段不会输出到屏幕
+		Subjects []string `json:"subjects"` // 二次编码
+		IsOk     bool     `json:",string"`  // 修改为字符串
+		Price    float64  `json:"price"`
+	}
+
+	jsonBuf := `
+		{
+         "company": "cast",
+         "isOk": "true",
+         "price": 66.66,
+         "subjects": [
+          "Go",
+          "c++"
+         ]
+        }
+	`
+	var tem IT
+	err := json.Unmarshal([]byte(jsonBuf), &tem) // 第二个参数为引用
+	if err != nil {
+		t.Log(err)
+	} else {
+		t.Log(tem)
+	}
+	// 只解析单个数据
+	type IT2 struct {
+		Company string `json:"company"`
+	}
+	var tem2 IT2
+	err = json.Unmarshal([]byte(jsonBuf), &tem2)
+	if err != nil {
+		t.Log(err)
+	} else {
+		t.Log(tem2)
+	}
+}
+
+// 测试 json 解析到 map
+func TestParseMap(t *testing.T) {
+
+	jsonBuf := `
+		{
+         "company": "cast",
+         "isOk": "true",
+         "price": 66.66,
+         "subjects": [
+          "Go",
+          "c++"
+         ]
+        }
+	`
+	// 创建map
+	m := make(map[string]interface{}, 4)
+	err := json.Unmarshal([]byte(jsonBuf), &m)
+	if err != nil {
+		t.Log(err)
+	} else {
+		t.Log(m)
+	}
+	var str string
+	//str = m["company"]
+	t.Log(str)
+	// 类型断言
+	for key, value := range m {
+		t.Logf("%v =======> %v", key, value)
+		switch data := value.(type) {
+		case string:
+			str = data
+			t.Logf("map[%s] ===> %T ",key,str)
+		}
+	}
+	// 使用 map 但是确定类型要使用类型断言，反推太麻烦了
 }
